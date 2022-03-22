@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using personalManagement.Entidades;
+using personalManagement.Servicios;
 
 namespace personalManagement.Controllers
 {
@@ -10,10 +11,35 @@ namespace personalManagement.Controllers
     public class AutoresCotrollers : ControllerBase
     {
         private readonly ApplicationDbContext _context;
-        public AutoresCotrollers(ApplicationDbContext context) 
+        private readonly IServicio servicio;
+        private readonly ServicioScoped _servicioScoped;
+        private readonly ServicioSingleton _servicioSingleton;
+        private readonly ServicioTransient _servicioTransient;
+
+        public AutoresCotrollers(ApplicationDbContext context,
+            IServicio servicio, 
+            ServicioScoped servicioScoped, 
+            ServicioSingleton servicioSingleton, 
+            ServicioTransient servicioTransient) 
         {
-            _context = context; 
+            _context = context;
+            this.servicio = servicio;
+            _servicioScoped = servicioScoped;
+            _servicioSingleton = servicioSingleton;
+            _servicioTransient = servicioTransient;
         }
+
+        [HttpGet("GUID")]
+        public ActionResult ObtenerGuids() 
+        {
+            return Ok(new
+                {
+                AutoresCotrollersTransient = _servicioTransient.Guid,
+                AutoresCotrollersTransient = _servicioTransient.Guid,
+                AutoresCotrollersTransient = _servicioTransient.Guid,
+            });
+        }
+
 
 
         //varias rutas para llegar al mismo recurso (REGLAS DE RUTEO)
@@ -22,6 +48,7 @@ namespace personalManagement.Controllers
         [HttpGet("/listado")] //listado
         public async Task<ActionResult<List<Autor>>> Get() 
         {
+            servicio.RealizarTarea();
             return await _context.Autores.Include(x=>x.Libros).ToListAsync();
         }
 
@@ -77,6 +104,12 @@ namespace personalManagement.Controllers
         //ActionResult<T>
         public async Task<ActionResult> Post(Autor autor) 
         {
+            //una validacion para saber si existe 
+            var existeAutorConElMismoNombre = await _context.Autores.AnyAsync(x => x.Nombre == autor.Nombre);
+            if (existeAutorConElMismoNombre) { 
+            return BadRequest($"ya existe un autor con el mismo nombre {autor.Nombre}");
+            }
+
             _context.Add(autor);
             await _context.SaveChangesAsync();
             

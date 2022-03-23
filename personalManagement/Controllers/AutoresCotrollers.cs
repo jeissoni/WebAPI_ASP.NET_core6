@@ -15,18 +15,23 @@ namespace personalManagement.Controllers
         private readonly ServicioScoped _servicioScoped;
         private readonly ServicioSingleton _servicioSingleton;
         private readonly ServicioTransient _servicioTransient;
+        private readonly ILogger<AutoresCotrollers> logger;
 
-        public AutoresCotrollers(ApplicationDbContext context,
+        public AutoresCotrollers(
+            ApplicationDbContext context,
             IServicio servicio, 
             ServicioScoped servicioScoped, 
             ServicioSingleton servicioSingleton, 
-            ServicioTransient servicioTransient) 
+            ServicioTransient servicioTransient,
+            ILogger<AutoresCotrollers> logger //log, el parametro es para saber desde donde se genera el log
+            ) 
         {
             _context = context;
             this.servicio = servicio;
             _servicioScoped = servicioScoped;
             _servicioSingleton = servicioSingleton;
             _servicioTransient = servicioTransient;
+            this.logger = logger;
         }
 
         [HttpGet("GUID")]
@@ -34,9 +39,14 @@ namespace personalManagement.Controllers
         {
             return Ok(new
                 {
-                AutoresCotrollersTransient = _servicioTransient.Guid,
-                AutoresCotrollersTransient = _servicioTransient.Guid,
-                AutoresCotrollersTransient = _servicioTransient.Guid,
+                AutoresCotrollers_Transient = _servicioTransient.Guid,               
+                servicioA_transient = servicio.OptenerTransient(),
+
+                AutoresCotrollers_Scoped = _servicioScoped.Guid,                
+                servicioA_scoped = servicio.OptenerScoped(),
+
+                AutoresCotrollers_Singleton = _servicioSingleton.Guid,
+                servicioA_singleton = servicio.OptenerSingleton()
             });
         }
 
@@ -48,6 +58,7 @@ namespace personalManagement.Controllers
         [HttpGet("/listado")] //listado
         public async Task<ActionResult<List<Autor>>> Get() 
         {
+            logger.LogInformation("Estamos opteniendo los autores");
             servicio.RealizarTarea();
             return await _context.Autores.Include(x=>x.Libros).ToListAsync();
         }

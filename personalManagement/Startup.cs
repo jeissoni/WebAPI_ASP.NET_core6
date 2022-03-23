@@ -54,7 +54,7 @@ namespace personalManagement
             //si se hace una peticion 
             //--> para una cache, mantener una informacion en memoria 
 
-            services.AddSingleton<IServicio, ServicioB>();
+            services.AddTransient<IServicio, ServicioA>();
 
             services.AddTransient<ServicioTransient>();
             services.AddScoped<ServicioScoped>();

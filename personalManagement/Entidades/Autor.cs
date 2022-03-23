@@ -21,10 +21,13 @@ namespace personalManagement.Entidades
         [NotMapped] //estan esta propiedad en el modelo pero no en la base de datos
         public int Edad { get; set; }
 
-
+        [NotMapped]
         public string Tarjeta { get; set; }
-
+        
+        [NotMapped]
         public int Menor { get; set; }
+        
+        [NotMapped]
         public int Mayor { get; set; }
 
         public List<Libro> Libros { get; set; }
